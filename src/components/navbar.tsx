@@ -16,14 +16,7 @@ const Navbar = () => {
 							<span className="block h-full w-full" />
 						</Link>
 					</li>
-					<li>
-						<Link href="/create">
-							<div className="py-2 px-4 border border-[#383a3e] rounded-md bg-[#2c2e32] flex items-center space-x-1 hover:bg-[#313438]">
-								<Image src={"/plus.png"} alt="" width={20} height={20} />
-								<span>Create</span>
-							</div>
-						</Link>
-					</li>
+
 					<li>
 						<Link href="explore" className="underline-transition">
 							Explore
