@@ -8,7 +8,17 @@ const config: Config = {
 		"./src/**/*.{js,ts,jsx,tsx,mdx}",
 	],
 	theme: {
-		extend: {},
+		extend: {
+			colors: {
+				mywhite: "#e6e6e6",
+			},
+		},
+	},
+	variants: {
+		extend: {
+			opacity: ["disabled"],
+			textColor: ["placeholder"],
+		},
 	},
 	plugins: [],
 };
