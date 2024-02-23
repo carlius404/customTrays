@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import React from "react";
 import SearchBar from "./searchbar";
 import Link from "next/link";
