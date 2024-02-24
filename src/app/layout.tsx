@@ -1,32 +1,23 @@
-import "tailwindcss/tailwind.css";
-import Navbar from "../components/navbar";
-import "./globals.css";
+import React from "react";
+import { Inter as FontSans } from "next/font/google";
+import { cn } from "@/lib/utils";
+import "@/styles/globals.css";
 
 export const metadata = {
 	title: "Custom Trays",
 	description: "",
 };
 
-import { Roboto } from "next/font/google";
-import Sidebar from "../components/sidebar";
-
-const robotos = Roboto({
-	weight: "400",
+export const fontSans = FontSans({
 	subsets: ["latin"],
-	display: "swap",
+	variable: "--font-sans",
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" className={robotos.className}>
-			<body className="flex flex-col h-screen overflow-y-hidden">
-				<div className="flex-none">
-					<Navbar />
-				</div>
-				<main className="grid grid-cols-[1fr,5fr] flex-grow">
-					<Sidebar />
-					{children}
-				</main>
+		<html lang="en">
+			<body className={cn("min-h-screen dark font-sans antialiased ", fontSans.variable)}>
+				{children}
 			</body>
 		</html>
 	);
