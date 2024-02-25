@@ -21,7 +21,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 				>
 					<Icons.home className="size-6" />
 				</Link>
-				<Card className="py-10 px-12 mx-auto flex w-full flex-col justify-center space-y-6 max-w-xl">
+				<Card className="py-10 px-16 mx-auto flex w-full flex-col justify-center space-y-6 max-w-lg">
 					{children}
 					<p className="px-8 text-center text-sm text-muted-foreground">
 						By clicking continue, you agree to our{" "}

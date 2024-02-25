@@ -1,5 +1,4 @@
 import { getAllTrays } from "@/actions/queries";
-import Signup from "@/components/signup-card";
 
 const Home = async () => {
 	const trays = await getAllTrays();
@@ -12,9 +11,7 @@ const Home = async () => {
 					<div key={tray.id}>{tray.title}</div>
 				))}
 			</div>
-			<div className="max-w-lg">
-				<Signup />
-			</div>
+			<div className="max-w-lg"></div>
 		</div>
 	);
 };
