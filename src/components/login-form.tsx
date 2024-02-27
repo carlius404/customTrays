@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,8 @@ import { useForm } from "react-hook-form";
 import FormError from "./form-error";
 import FormSuccess from "./form-success";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "./ui/form";
+import Socials from "./auth/socials";
+import { useSearchParams } from "next/navigation";
 
 interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -23,6 +24,12 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 	const [isPending, startTransition] = useTransition();
 	const [error, setError] = React.useState<string | undefined>();
 	const [success, setSuccess] = React.useState<string | undefined>();
+
+	const searchParams = useSearchParams();
+	const urlError =
+		searchParams.get("error") === "OAuthAccountNotLinked"
+			? "Email already in use with a different provider"
+			: "";
 
 	const form = useForm<z.infer<typeof loginSchema>>({
 		resolver: zodResolver(loginSchema),
@@ -93,7 +100,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 								)}
 							/>
 						</div>
-						<FormError message={error} />
+						<FormError message={error || urlError} />
 						<FormSuccess message={success} />
 						<Button disabled={isPending} type="submit">
 							{isPending && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
@@ -121,16 +128,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 					<span className="bg-background px-2 text-muted-foreground">Or continue with</span>
 				</div>
 			</div>
-			<div className="flex flex-col space-y-2">
-				<Button variant="outline" type="button" disabled={isPending}>
-					<Icons.google className="mr-2 h-4 w-4" />
-					Google
-				</Button>
-				<Button variant="outline" type="button" disabled={isPending}>
-					<Icons.gitHub className="mr-2 h-4 w-4" />
-					GitHub
-				</Button>
-			</div>
+			<Socials isPending={isPending} />
 		</div>
 	);
 }

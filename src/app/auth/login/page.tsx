@@ -1,5 +1,6 @@
 import { LoginForm } from "@/components/login-form";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
 	title: "Custom Trays - Login",
@@ -14,6 +15,17 @@ export default function LoginPage() {
 				<p className="text-sm text-muted-foreground">Enter your email or username to log in</p>
 			</div>
 			<LoginForm />
+			<p className="px-8 text-center text-sm text-muted-foreground">
+				By clicking continue, you agree to our{" "}
+				<Link href="/terms" className="underline underline-offset-4 hover:text-primary">
+					Terms of Service
+				</Link>{" "}
+				and{" "}
+				<Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
+					Privacy Policy
+				</Link>
+				.
+			</p>
 		</>
 	);
 }
