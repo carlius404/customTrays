@@ -9,7 +9,11 @@ import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
 import { generateVerificationToken } from "@/lib/tokens";
-import { getVerificationTokenByEmail } from "@/data/verification-token";
+import {
+	getVerificationTokenByEmail,
+	getVerificationTokenByToken,
+} from "@/data/verification-token";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export async function createUser(data: z.infer<typeof signupSchema>): Promise<SignupResponse> {
 	console.log(data);
@@ -23,7 +27,6 @@ export async function createUser(data: z.infer<typeof signupSchema>): Promise<Si
 	const hashedPassword = await bcryptjs.hash(password, 10);
 
 	const existingUser = await getUserByEmail(email);
-	console.log("existingUser", existingUser);
 
 	if (existingUser) {
 		return { error: { message: "Email already in use!" } };
@@ -37,6 +40,8 @@ export async function createUser(data: z.infer<typeof signupSchema>): Promise<Si
 			return e;
 		});
 	const verificationToken = await generateVerificationToken(email);
+	await sendVerificationEmail(verificationToken.email, verificationToken.token);
+
 	return { user: createdUser };
 }
 
@@ -55,7 +60,8 @@ export const login = async (data: z.infer<typeof loginSchema>) => {
 	}
 
 	if (!existingUser.emailVerified) {
-		const verificationToken = generateVerificationToken(existingUser.email);
+		const verificationToken = await generateVerificationToken(existingUser.email);
+		await sendVerificationEmail(verificationToken.email, verificationToken.token);
 		return { error: { message: "Confirmation email sent" } };
 	}
 
@@ -74,4 +80,31 @@ export const login = async (data: z.infer<typeof loginSchema>) => {
 		}
 		throw error;
 	}
+};
+
+export const emailVerification = async (token: string) => {
+	const existingToken = await getVerificationTokenByToken(token);
+
+	if (!existingToken) {
+		return { error: { message: "Invalid token" } };
+	}
+
+	const hasExpired = new Date(existingToken.expires) < new Date();
+	if (hasExpired) {
+		return { error: { message: "Token has expired" } };
+	}
+	const existingUser = await getUserByEmail(existingToken.email);
+
+	if (!existingUser) {
+		return { error: { message: "Email does not exist" } };
+	}
+
+	await prisma.user.update({
+		where: { id: existingUser.id },
+		data: { emailVerified: new Date(), email: existingToken.email },
+	});
+
+	await prisma.verificationToken.delete({ where: { id: existingToken.id } });
+
+	return { user: existingUser };
 };

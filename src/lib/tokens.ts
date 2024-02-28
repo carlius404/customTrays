@@ -7,7 +7,6 @@ export const generateVerificationToken = async (email: string) => {
 	const expires = new Date(new Date().getTime() + 3600 * 1000);
 
 	const existingToken = await getVerificationTokenByEmail(email);
-	console.log("existingToken", existingToken);
 
 	if (existingToken) {
 		await prisma.verificationToken.delete({
@@ -24,4 +23,6 @@ export const generateVerificationToken = async (email: string) => {
 			expires,
 		},
 	});
+
+	return verificationToken;
 };

@@ -39,7 +39,7 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 			console.log("values", values);
 			createUser(values).then((data) => {
 				setError(data.error?.message);
-				setSuccess(data.user ? "Account Created" : undefined);
+				setSuccess(data.user ? "Confirmation email sent!" : undefined);
 			});
 			// send email verification link
 		});
