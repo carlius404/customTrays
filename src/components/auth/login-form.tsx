@@ -6,40 +6,47 @@ import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { loginSchema } from "@/shemas";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useTransition } from "react";
+import { login } from "@/actions/mutations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { signupSchema } from "@/shemas";
-import { useState, useTransition } from "react";
-import { createUser } from "@/actions/mutations";
-import FormError from "./form-error";
-import FormSuccess from "./form-success";
+import { useForm } from "react-hook-form";
+import FormError from "@/components/auth/form-error";
+import FormSuccess from "@/components/auth/form-success";
+import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
+import Socials from "@/components/auth/socials";
+import { useSearchParams } from "next/navigation";
 
-interface SignupFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function SignupForm({ className, ...props }: SignupFormProps) {
+export function LoginForm({ className, ...props }: LoginFormProps) {
 	const [isPending, startTransition] = useTransition();
-	const [error, setError] = useState<string | undefined>();
-	const [success, setSuccess] = useState<string | undefined>();
+	const [error, setError] = React.useState<string | undefined>();
+	const [success, setSuccess] = React.useState<string | undefined>();
 
-	const form = useForm<z.infer<typeof signupSchema>>({
-		resolver: zodResolver(signupSchema),
+	const searchParams = useSearchParams();
+	const urlError =
+		searchParams.get("error") === "OAuthAccountNotLinked"
+			? "Email already in use with a different provider"
+			: "";
+
+	const form = useForm<z.infer<typeof loginSchema>>({
+		resolver: zodResolver(loginSchema),
 		defaultValues: {
 			email: "",
-			username: "",
 			password: "",
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof signupSchema>) {
+	function onSubmit(values: z.infer<typeof loginSchema>) {
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
 			console.log("values", values);
-			createUser(values).then((data) => {
-				setError(data.error?.message);
-				setSuccess(data.user ? "Confirmation email sent!" : undefined);
+			login(values).then((data) => {
+				setError(data?.error?.message);
+				// setSuccess(data?.user ? "Logged In" : undefined);
 			});
 			// send email verification link
 		});
@@ -53,18 +60,18 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 						<div className="grid gap-4">
 							<FormField
 								control={form.control}
-								name="username"
+								name="email"
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
 											<Input
-												label="Username"
-												id="username"
+												label="Email"
+												id="email"
 												type="text"
 												autoCapitalize="none"
+												autoComplete="email"
 												autoCorrect="off"
 												disabled={isPending}
-												aria-invalid={!!form.formState.errors.username}
 												{...field}
 											/>
 										</FormControl>
@@ -92,44 +99,25 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 									</FormItem>
 								)}
 							/>
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<Input
-												label="Email"
-												id="email"
-												type="text"
-												autoCapitalize="none"
-												autoComplete="email"
-												autoCorrect="off"
-												disabled={isPending}
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 						</div>
-						<FormError message={error} />
+						<FormError message={error || urlError} />
 						<FormSuccess message={success} />
 						<Button disabled={isPending} type="submit">
 							{isPending && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-							Sign Up
+							Log In
 						</Button>
 					</div>
 				</form>
 			</Form>
-			<div className="text-sm inline-block text-muted-foreground">
-				<span>Already have an account? </span>
+			<div className="text-sm block text-muted-foreground">
+				<span>Don't have an account? </span>
 				<Link
-					href="/auth/login"
-					className={`text-muted-foreground underline ${isPending && `cursor-default`}`}
+					href="/auth/signup"
+					className={
+						!isPending ? "text-primary underline" : "text-muted-foreground underline cursor-default"
+					}
 				>
-					Log In
+					Sign Up
 				</Link>
 			</div>
 			<div className="relative">
@@ -140,16 +128,7 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 					<span className="bg-background px-2 text-muted-foreground">Or continue with</span>
 				</div>
 			</div>
-			<div className="flex flex-col space-y-2">
-				<Button variant="outline" type="button" disabled={isPending}>
-					<Icons.google className="mr-2 h-4 w-4" />
-					Google
-				</Button>
-				<Button variant="outline" type="button" disabled={isPending}>
-					<Icons.gitHub className="mr-2 h-4 w-4" />
-					GitHub
-				</Button>
-			</div>
+			<Socials isPending={isPending} />
 		</div>
 	);
 }

@@ -4,9 +4,8 @@ import { emailVerification } from "@/actions/mutations";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
-import { set } from "zod";
-import FormSuccess from "../form-success";
-import FormError from "../form-error";
+import FormSuccess from "@/components/auth/form-success";
+import FormError from "@/components/auth/form-error";
 
 const EmailVerificationForm = () => {
 	const [error, setError] = useState<string | undefined>(undefined);
