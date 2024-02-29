@@ -13,22 +13,12 @@ export const ThreeScenes = () => {
             const scene3D = new ThreeScene("myThreeJsCanvas3D", false,true,false,false);
             setScene2D(scene2D);
             setScene3D(scene3D);
-            scene2D.init();
+            scene2D.init();      
             scene3D.init();
             scene2D.addCell("box");
             scene2D.addCell("box");
 
-            const copyObjects=(fromScene,toScene)=>{
-                fromScene.traverse(function(object) {
-                    if (object instanceof THREE.Mesh) {
-                        var clonedObject = object.clone();
-                        toScene.add(clonedObject);
-                    }
-                });
-            }
-
             const animate=()=>{
-                //copyObjects(scene2D.scene,scene3D.scene)
                 scene3D.scene.children=scene2D.scene.children
                 scene2D.renderer.render(scene2D.scene,scene2D.camera)
                 scene3D.renderer.render(scene3D.scene,scene3D.camera)

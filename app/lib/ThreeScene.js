@@ -71,7 +71,7 @@ export default class ThreeScene{
     this.renderer.render(this.scene, this.camera);
     }
 
-    addCell(geom){
+    createObj(geom){
         if(geom=="box"){
 			console.log("box")
 			var obj=new THREE.Mesh(
@@ -107,8 +107,26 @@ export default class ThreeScene{
 				new THREE.MeshBasicMaterial({color: "#546E7A"}),
 			  );
 		}
+        if(geom=="polygon"){
+			var obj=new THREE.Mesh(
+				new THREE.CylinderGeometry(5, 5, 20, 3), //radiustop,radiusbottom,height,radialsegments,
+				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+			  );
+		}
+
+        return obj
+    }
+
+    addCell(geom){
+        const obj=this.createObj(geom)
         this.scene.add(obj)
         this.cells.push(obj)
+    }
+
+    setTray(geom){
+        this.tray=this.createObj(geom)
+        this.scene.add(this.tray)
+        this.cells.push(this.tray)
     }
 
     onClick(event) {
