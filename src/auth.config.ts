@@ -1,7 +1,7 @@
 import credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 import bcryptjs from "bcryptjs";
-import { loginSchema } from "@/shemas";
+import { LoginSchema } from "@/shemas";
 import { getUserByEmail } from "./actions/queries";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -18,7 +18,7 @@ export default {
 		}),
 		credentials({
 			async authorize(credentials) {
-				const validatedFields = loginSchema.safeParse(credentials);
+				const validatedFields = LoginSchema.safeParse(credentials);
 
 				console.log("validatedFields", validatedFields);
 

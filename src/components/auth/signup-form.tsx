@@ -10,7 +10,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { signupSchema } from "@/shemas";
+import { SignupSchema } from "@/shemas";
 import { useState, useTransition } from "react";
 import { createUser } from "@/actions/mutations";
 import FormError from "@/components/auth/form-error";
@@ -23,8 +23,8 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 	const [error, setError] = useState<string | undefined>();
 	const [success, setSuccess] = useState<string | undefined>();
 
-	const form = useForm<z.infer<typeof signupSchema>>({
-		resolver: zodResolver(signupSchema),
+	const form = useForm<z.infer<typeof SignupSchema>>({
+		resolver: zodResolver(SignupSchema),
 		defaultValues: {
 			email: "",
 			username: "",
@@ -32,16 +32,15 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof signupSchema>) {
+	function onSubmit(values: z.infer<typeof SignupSchema>) {
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
 			console.log("values", values);
 			createUser(values).then((data) => {
-				setError(data.error?.message);
-				setSuccess(data.user ? "Confirmation email sent!" : undefined);
+				setError(data.error);
+				setSuccess(data.success);
 			});
-			// send email verification link
 		});
 	}
 

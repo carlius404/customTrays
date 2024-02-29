@@ -24,11 +24,8 @@ const EmailVerificationForm = () => {
 
 		emailVerification(token)
 			.then((res) => {
-				if (res.error) {
-					setError(res.error.message);
-				} else {
-					setSuccess("Email verified!");
-				}
+				setError(res.error);
+				setSuccess("Email verified!");
 			})
 			.catch((e) => {
 				setError("Something went wrong");

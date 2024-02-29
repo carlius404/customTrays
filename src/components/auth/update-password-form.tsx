@@ -6,46 +6,42 @@ import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { LoginSchema } from "@/shemas";
+import { UpdatePasswordSchema } from "@/shemas";
 import { z } from "zod";
 import { useTransition } from "react";
-import { login } from "@/actions/mutations";
+import { updatePassword } from "@/actions/mutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import FormError from "@/components/auth/form-error";
 import FormSuccess from "@/components/auth/form-success";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
-import Socials from "@/components/auth/socials";
 import { useSearchParams } from "next/navigation";
 
-interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UpdatePasswordFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function LoginForm({ className, ...props }: LoginFormProps) {
+export function UpdatePasswordForm({ className, ...props }: UpdatePasswordFormProps) {
 	const [isPending, startTransition] = useTransition();
 	const [error, setError] = React.useState<string | undefined>();
 	const [success, setSuccess] = React.useState<string | undefined>();
 
 	const searchParams = useSearchParams();
-	const urlError =
-		searchParams.get("error") === "OAuthAccountNotLinked"
-			? "Email already in use with a different provider"
-			: "";
+	const token = searchParams.get("token");
 
-	const form = useForm<z.infer<typeof LoginSchema>>({
-		resolver: zodResolver(LoginSchema),
+	const form = useForm<z.infer<typeof UpdatePasswordSchema>>({
+		resolver: zodResolver(UpdatePasswordSchema),
 		defaultValues: {
-			email: "",
 			password: "",
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof LoginSchema>) {
+	function onSubmit(values: z.infer<typeof UpdatePasswordSchema>) {
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
 			console.log("values", values);
-			login(values).then((data) => {
+			updatePassword(values, token).then((data) => {
 				setError(data?.error);
+				setSuccess(data?.success);
 			});
 		});
 	}
@@ -56,27 +52,6 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<div className="grid gap-4">
 						<div className="grid gap-4">
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<Input
-												label="Email"
-												id="email"
-												type="text"
-												autoCapitalize="none"
-												autoComplete="email"
-												autoCorrect="off"
-												disabled={isPending}
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 							<FormField
 								control={form.control}
 								name="password"
@@ -97,40 +72,24 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 									</FormItem>
 								)}
 							/>
-							<Link
-								href="/auth/forgot-password"
-								className="text-muted-foreground text-sm underline"
-							>
-								Forgot Password?
-							</Link>
 						</div>
-						<FormError message={error || urlError} />
+						<FormError message={error} />
 						<FormSuccess message={success} />
+						<Link
+							href="/auth/login"
+							className={`text-sm block text-muted-foreground underline  ${
+								isPending && "pointer-events-none"
+							}`}
+						>
+							Back to login
+						</Link>
 						<Button disabled={isPending} type="submit" className="mt-2">
 							{isPending && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-							Log In
+							Update Password
 						</Button>
 					</div>
 				</form>
 			</Form>
-			<div className="text-sm block text-muted-foreground">
-				<span>Don't have an account? </span>
-				<Link
-					href="/auth/signup"
-					className={`text-muted-foreground underline ${isPending && "pointer-events-none"}`}
-				>
-					Sign Up
-				</Link>
-			</div>
-			<div className="relative">
-				<div className="absolute inset-0 flex items-center">
-					<span className="w-full border-t" />
-				</div>
-				<div className="relative flex justify-center text-xs uppercase">
-					<span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-				</div>
-			</div>
-			<Socials isPending={isPending} />
 		</div>
 	);
 }
