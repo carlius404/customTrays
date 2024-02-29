@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 import ThreeScene from './lib/ThreeScene';
-import { CellsContext } from './page';
+import { CellsContext, TrayContext } from './page';
 
 export const ThreeScenes = () => {
     const [newCell, setNewCell] = useContext(CellsContext);
+    const [tray, setTray]=useContext(TrayContext);
     const [scene2D, setScene2D] = useState(undefined);
     const [scene3D, setScene3D] = useState(undefined);
     useEffect(() => {
@@ -17,6 +18,7 @@ export const ThreeScenes = () => {
             scene3D.init();
             scene2D.addCell("box");
             scene2D.addCell("box");
+            scene2D.setTray("box")
 
             const animate=()=>{
                 scene3D.scene.children=scene2D.scene.children
@@ -35,6 +37,12 @@ export const ThreeScenes = () => {
             scene2D.addCell(newCell)
         }
     }, [scene2D, newCell]);
+
+    useEffect(() => {
+        if (scene2D && tray !== null) {
+            scene2D.setTray(tray)
+        }
+    }, [scene2D, tray]);
     return (
     <div>
         <canvas id="myThreeJsCanvas2D"/>

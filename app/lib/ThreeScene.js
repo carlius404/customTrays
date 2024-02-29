@@ -16,6 +16,7 @@ export default class ThreeScene{
         this.cells=[]
         this.onClick = this.onClick.bind(this)
         this.dragStartCallback=this.dragStartCallback.bind(this)
+        this.tray=null
     }
 
     init(){
@@ -124,6 +125,9 @@ export default class ThreeScene{
     }
 
     setTray(geom){
+        if(this.tray!=null){
+            this.scene.remove(this.tray)
+        }
         this.tray=this.createObj(geom)
         this.scene.add(this.tray)
         this.cells.push(this.tray)
