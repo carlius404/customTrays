@@ -2,20 +2,22 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DragControls } from 'three/addons/controls/DragControls.js';
 import {GUI} from "dat.gui"
+import { create } from 'domain';
 
 export default class ThreeScene{
-    constructor(canvasId,drag,orbit,ortographic,dimGui){
+    constructor(canvasId,drag,orbit,ortographic,dimGui,maxDim){
         this.drag=drag
         this.orbit=orbit
         this.ortographic=ortographic
         this.canvasId = canvasId
         this.dimGui=dimGui
+        this.maxDim=maxDim
 
-        this.selectedColor="#673AB7"
+        this.selectedObj=null
+        this.beforeColor=null
         this.cellColor="#546E7A"
         this.cells=[]
         this.onClick = this.onClick.bind(this)
-        this.dragStartCallback=this.dragStartCallback.bind(this)
         this.tray=null
     }
 
@@ -45,7 +47,6 @@ export default class ThreeScene{
 
         if(this.drag){
             var dragCntrls = new DragControls(this.cells,this.camera, this.renderer.domElement)
-            dragCntrls.addEventListener("dragstart",this.dragStartCallback)
         }
         if(this.dimGui){
             this.raycaster = new THREE.Raycaster();
@@ -56,79 +57,102 @@ export default class ThreeScene{
         
     }
 
-    dragStartCallback(event){
-        event.object.material.color.set(this.selectedColor)
-    }
-      
-    animate() {
-        window.requestAnimationFrame(this.animate.bind(this));
-        this.render();
-        if(this.orbit){
-          this.orbCntrls.update();
+    createFolder(obj){
+        var folder
+        if(obj.geometry instanceof THREE.BoxGeometry){
+            folder=this.gui.addFolder('Box');
+            folder.add(obj.scale, 'x', obj.geometry.scale.x, this.maxDim).name('Width');
+            folder.add(obj.scale, 'y', obj.geometry.scale.y, this.maxDim).name('Height');
+            return folder
         }
-      }
-    
-    render() {
-    this.renderer.render(this.scene, this.camera);
+        
+        if(obj.geometry instanceof THREE.CylinderGeometry){
+            folder=this.gui.addFolder('Cylinder');
+            folder.add(obj.scale, 'radiusTop', 0.1, this.maxDim).name('radius top');
+            folder.add(obj.scale, 'radiusBottom', 0.1, this.maxDim).name('radius bottom');
+            return folder
+        }
+
+        if(obj.geometry instanceof THREE.SphereGeometry){
+            folder=this.gui.addFolder('Sphere');
+            folder.add(obj.scale, 'radius', 0.1, this.maxDim).name('radius');
+            return folder
+        }
+
+        if(obj.geometry instanceof THREE.ConeGeometry){
+            folder=this.gui.addFolder('Cone');
+            folder.add(obj.scale, 'radius', 0.1, this.maxDim).name('radius');
+            return folder
+        }
+
+        if(obj.geometry instanceof THREE.RingGeometry){
+            folder=this.gui.addFolder('Ring');
+            folder.add(obj.scale, 'innerRadius', 0.1, this.maxDim).name('inner radius');
+            folder.add(obj.scale, 'outerRadius', 0.1, this.maxDim).name('outer radius');
+            return folder
+        }
+        
     }
 
-    createObj(geom){
+    createObj(geom,dim,color){
+        const mesh=new THREE.MeshBasicMaterial({color: color, side:THREE.BackSide})
+
         if(geom=="box"){
-			console.log("box")
 			var obj=new THREE.Mesh(
-				new THREE.BoxGeometry(16, 16, 16),
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.BoxGeometry(dim, dim, dim),
+				mesh,
 			  );
 		}
 
 		if(geom=="cylinder"){
 			var obj=new THREE.Mesh(
-				new THREE.CylinderGeometry(5, 5, 20, 32), //radiustop,radiusbottom,height,radialsegments,
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.CylinderGeometry(dim, dim, 20, 32), //radiustop,radiusbottom,height,radialsegments,
+				mesh,
 			  );
+            
 		}
 
 		if(geom=="sphere"){
 			var obj=new THREE.Mesh(
-				new THREE.SphereGeometry(15, 32, 16), //radius, widthsegments,heightsegments
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.SphereGeometry(dim, 32, 32), //radius, widthsegments,heightsegments
+				mesh,
 			  );
 		}
 
 		if(geom=="cone"){
 			var obj=new THREE.Mesh(
-				new THREE.ConeGeometry(5, 20, 32), //radius,height,radiusSegments
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.ConeGeometry(dim, 20, 32), //radius,height,radiusSegments
+				mesh,
 			  );
 		}
 
 		if(geom=="ring"){
 			var obj=new THREE.Mesh(
-				new THREE.RingGeometry(1, 5, 32), //innerradius,outerRadius,thetaSegments
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.RingGeometry(dim-dim/2, dim, 32), //innerradius,outerRadius,thetaSegments
+				mesh,
 			  );
 		}
         if(geom=="polygon"){
 			var obj=new THREE.Mesh(
-				new THREE.CylinderGeometry(5, 5, 20, 3), //radiustop,radiusbottom,height,radialsegments,
-				new THREE.MeshBasicMaterial({color: "#546E7A"}),
+				new THREE.CylinderGeometry(dim, dim, 20, 3), //radiustop,radiusbottom,height,radialsegments,
+				mesh,
 			  );
 		}
 
         return obj
     }
 
-    addCell(geom){
-        const obj=this.createObj(geom)
+    addCell(geom,dim){
+        const obj=this.createObj(geom,dim,"#334155")
         this.scene.add(obj)
         this.cells.push(obj)
     }
 
-    setTray(geom){
+    setTray(geom,dim){
         if(this.tray!=null){
             this.scene.remove(this.tray)
         }
-        this.tray=this.createObj(geom)
+        this.tray=this.createObj(geom,dim,"#475569")
         this.scene.add(this.tray)
         this.cells.push(this.tray)
     }
@@ -143,7 +167,6 @@ export default class ThreeScene{
             // Effettua il raycasting
             this.raycaster.setFromCamera(this.mouse, this.camera);
             const intersects = this.raycaster.intersectObjects(this.cells);
-
             // Se un cubo è stato cliccato, mostra i controlli di dat.gui per modificare le dimensioni
             
             if (intersects.length > 0) {
@@ -152,11 +175,20 @@ export default class ThreeScene{
                     this.gui.removeFolder(this.folder)
                 }
                 const selectedObj = intersects[0].object;
-                this.folder= this.gui.addFolder('');
-                this.folder.add(selectedObj.scale, 'x', 0.1, 2).name('Larghezza');
-                this.folder.add(selectedObj.scale, 'y', 0.1, 2).name('Altezza');
-                this.folder.add(selectedObj.scale, 'z', 0.1, 2).name('Profondità');
-                this.folder.open();
+                if(this.selectedObj!=selectedObj){
+                    this.beforeColor=selectedObj.material.color.getHexString()
+                    selectedObj.material.color.set("#4338ca")
+                    this.selectedObj=selectedObj
+
+                    this.folder= this.createFolder(selectedObj)
+                    this.folder.open();
+                }else{
+                    console.log(this.beforeColor)
+                    selectedObj.material.color.set("#"+this.beforeColor)
+                    this.selectedObj=null
+                }
+                
+                
             }
         }
     }

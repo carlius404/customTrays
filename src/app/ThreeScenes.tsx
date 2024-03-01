@@ -8,17 +8,20 @@ export const ThreeScenes = () => {
     const [tray, setTray]=useContext(TrayContext);
     const [scene2D, setScene2D] = useState(undefined);
     const [scene3D, setScene3D] = useState(undefined);
+    const maxDim=50 //in cm
+    
     useEffect(() => {
         if (typeof scene2D === 'undefined') {
-            const scene2D = new ThreeScene("myThreeJsCanvas2D", true,false,true,true);
-            const scene3D = new ThreeScene("myThreeJsCanvas3D", false,true,false,false);
-            setScene2D(scene2D);
-            setScene3D(scene3D);
-            scene2D.init();      
-            scene3D.init();
-            scene2D.addCell("box");
-            scene2D.addCell("box");
-            scene2D.setTray("box")
+            const scene2D = new ThreeScene("myThreeJsCanvas2D", true,false,true,true,maxDim)
+            const scene3D = new ThreeScene("myThreeJsCanvas3D", false,true,false,false,maxDim)
+            setScene2D(scene2D)
+            setScene3D(scene3D)
+            scene2D.init()      
+            scene3D.init()
+            scene2D.addCell("box",maxDim/3)
+            scene2D.addCell("box",maxDim/3)
+            scene2D.setTray("box",maxDim)
+
 
             const animate=()=>{
                 scene3D.scene.children=scene2D.scene.children
@@ -34,19 +37,22 @@ export const ThreeScenes = () => {
 
     useEffect(() => {
         if (scene2D && newCell !== null) {
-            scene2D.addCell(newCell)
+            scene2D.addCell(newCell,maxDim/3)
         }
     }, [scene2D, newCell]);
 
     useEffect(() => {
         if (scene2D && tray !== null) {
-            scene2D.setTray(tray)
+            scene2D.setTray(tray,maxDim)
         }
     }, [scene2D, tray]);
     return (
-    <div>
-        <canvas id="myThreeJsCanvas2D"/>
-        <canvas id="myThreeJsCanvas3D"/>
-    </div>
+     <div className="relative">
+         <div className='flex flex-row'>
+                 <canvas id="myThreeJsCanvas2D" className="absolute"/>
+                 <canvas id="myThreeJsCanvas3D" className="absolute"/>
+         </div>
+     </div>
+
     )
 }
