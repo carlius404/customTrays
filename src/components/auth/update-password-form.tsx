@@ -38,7 +38,6 @@ export function UpdatePasswordForm({ className, ...props }: UpdatePasswordFormPr
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
-			console.log("values", values);
 			updatePassword(values, token).then((data) => {
 				setError(data?.error);
 				setSuccess(data?.success);

@@ -34,7 +34,6 @@ export function ForgotPasswordForm({ className, ...props }: ForgotPasswordFormPr
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
-			console.log("values", values);
 			forgotPassword(values).then((data) => {
 				setError(data?.error);
 				setSuccess(data?.success);

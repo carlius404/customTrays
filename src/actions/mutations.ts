@@ -2,7 +2,6 @@
 import bcryptjs from "bcryptjs";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { SignupResponse } from "@/lib/utils";
 import { LoginSchema, ForgotPasswordSchema, SignupSchema, UpdatePasswordSchema } from "@/shemas";
 import { getPasswordUpdateTokenByToken, getUserByEmail } from "@/actions/queries";
 import { signIn } from "@/auth";
@@ -11,9 +10,10 @@ import { AuthError } from "next-auth";
 import { generatePasswordUpdateToken, generateVerificationToken } from "@/lib/tokens";
 import { getVerificationTokenByToken } from "@/actions/queries";
 import { sendPasswordUpdateEmail, sendVerificationEmail } from "@/lib/mail";
+import { signOut } from "@/auth";
 
 export const createUser = async (data: z.infer<typeof SignupSchema>) => {
-	console.log(data);
+	console.log("creating user:", data.email);
 	const validatedFields = SignupSchema.safeParse(data);
 
 	if (!validatedFields.success) {
@@ -44,6 +44,7 @@ export const createUser = async (data: z.infer<typeof SignupSchema>) => {
 
 export const login = async (data: z.infer<typeof LoginSchema>) => {
 	const validatedFields = LoginSchema.safeParse(data);
+	console.log("logging in:", data.email);
 	if (!validatedFields.success) {
 		return { error: "Invalid fields!" };
 	}
@@ -164,4 +165,9 @@ export const updatePassword = async (
 	await prisma.passwordUpdateToken.delete({ where: { id: existingToken.id } });
 
 	return { success: "Password updated!" };
+};
+
+export const logout = async () => {
+	console.log("logging out");
+	await signOut();
 };

@@ -44,7 +44,6 @@ export const {
 			return session;
 		},
 		async jwt({ token }) {
-			console.log("jwt token", token);
 			return token;
 		},
 	},

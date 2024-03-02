@@ -11,7 +11,6 @@ const SearchBar = () => {
 	const handleSubmit = (event: { preventDefault: () => void }) => {
 		event.preventDefault();
 		// Handle the search term...
-		console.log(searchTerm);
 	};
 
 	return (

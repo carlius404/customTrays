@@ -2,6 +2,8 @@ import React from "react";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
 
 export const metadata = {
 	title: "Custom Trays",
@@ -13,12 +15,15 @@ export const fontSans = FontSans({
 	variable: "--font-sans",
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+	const session = await auth();
 	return (
-		<html lang="en">
-			<body className={cn("min-h-screen dark font-sans antialiased ", fontSans.variable)}>
-				{children}
-			</body>
-		</html>
+		<SessionProvider session={session}>
+			<html lang="en">
+				<body className={cn("min-h-screen dark font-sans antialiased ", fontSans.variable)}>
+					{children}
+				</body>
+			</html>
+		</SessionProvider>
 	);
 }

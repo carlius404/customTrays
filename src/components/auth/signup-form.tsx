@@ -36,7 +36,6 @@ export function SignupForm({ className, ...props }: SignupFormProps) {
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
-			console.log("values", values);
 			createUser(values).then((data) => {
 				setError(data.error);
 				setSuccess(data.success);

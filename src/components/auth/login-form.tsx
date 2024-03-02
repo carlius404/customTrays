@@ -43,7 +43,6 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 		setError(undefined);
 		setSuccess(undefined);
 		startTransition(() => {
-			console.log("values", values);
 			login(values).then((data) => {
 				setError(data?.error);
 			});
