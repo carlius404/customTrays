@@ -5,11 +5,11 @@ import {GUI} from "dat.gui"
 import { create } from 'domain';
 
 export default class ThreeScene{
-    constructor(canvasId,drag,orbit,ortographic,dimGui,maxDim){
+    constructor(canvasref,drag,orbit,ortographic,dimGui,maxDim){
         this.drag=drag
         this.orbit=orbit
         this.ortographic=ortographic
-        this.canvasId = canvasId
+        this.canvasref = canvasref
         this.dimGui=dimGui
         this.maxDim=maxDim
 
@@ -26,20 +26,14 @@ export default class ThreeScene{
         if(this.ortographic){
             this.camera=new THREE.OrthographicCamera(-40,40,40,-40,1,1000)
         }else{
-            this.camera = new THREE.PerspectiveCamera(
-                45,
-                window.innerWidth / window.innerHeight,
-                1,
-                1000
-              );
+            this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / 3 / window.innerHeight, 0.1, 1000)
         }
-        this.camera.position.z = 48;
+        this.camera.position.z = 90;
         
-        const canvas = document.getElementById(this.canvasId);
-        this.renderer = new THREE.WebGLRenderer({canvas});
 
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.renderer.domElement);
+        this.renderer = new THREE.WebGLRenderer({canvas:this.canvasref.current});
+
+        this.renderer.setSize(window.innerWidth/3, window.innerHeight);
         
         if(this.orbit){
             this.orbCntrls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -175,6 +169,7 @@ export default class ThreeScene{
                     this.gui.removeFolder(this.folder)
                 }
                 const selectedObj = intersects[0].object;
+                console.log(selectedObj)
                 if(this.selectedObj!=selectedObj){
                     this.beforeColor=selectedObj.material.color.getHexString()
                     selectedObj.material.color.set("#4338ca")
@@ -187,8 +182,10 @@ export default class ThreeScene{
                     selectedObj.material.color.set("#"+this.beforeColor)
                     this.selectedObj=null
                 }
-                
-                
+            }else{
+                console.log(this.beforeColor)
+                selectedObj.material.color.set("#"+this.beforeColor)
+                this.selectedObj=null
             }
         }
     }
