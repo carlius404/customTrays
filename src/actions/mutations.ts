@@ -169,5 +169,5 @@ export const updatePassword = async (
 
 export const logout = async () => {
 	console.log("logging out");
-	await signOut();
+	await signOut({ redirectTo: "http://localhost:3000/", redirect: true });
 };

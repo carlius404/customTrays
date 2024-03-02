@@ -19,13 +19,23 @@ const Navbar = () => {
 					</li>
 
 					<li>
-						<Link href="explore" className="underline-transition">
+						<Link href="/explore" className="underline-transition">
 							Explore
 						</Link>
 					</li>
 					<li>
-						<Link href="saved" className="underline-transition">
+						<Link href="/saved" className="underline-transition">
 							Saved
+						</Link>
+					</li>
+					<li>
+						<Link href="/create" className="underline-transition">
+							Create
+						</Link>
+					</li>
+					<li>
+						<Link href="/settings" className="underline-transition">
+							Settings
 						</Link>
 					</li>
 				</ul>
