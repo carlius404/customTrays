@@ -6,11 +6,9 @@ import { TbConePlus } from "react-icons/tb"
 import { TbCirclePlus } from "react-icons/tb"
 import { MdOutlineTextIncrease } from "react-icons/md"
 import { FaRegSquare } from "react-icons/fa"
-import { IoTriangleOutline } from "react-icons/io5"
 import { BiShapePolygon } from "react-icons/bi"
 import { FaRegCircle } from "react-icons/fa"
-import torus from "../public/torus.png"
-import { CellsContext, TrayContext } from './page'
+import { CellsContext, TrayContext } from '@/app/create/page'
 
 export const CellsMenu = () => {
   const [newCell, setNewCell] = useContext(CellsContext);

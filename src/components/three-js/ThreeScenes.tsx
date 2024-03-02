@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import * as THREE from 'three';
-import ThreeScene from './lib/ThreeScene';
-import { CellsContext, TrayContext } from './page';
+import React, { useContext, useEffect, useState } from 'react'
+import ThreeScene from '@/lib/ThreeScene';
+import { CellsContext, TrayContext } from '@/app/create/page';
 
 export const ThreeScenes = () => {
     const [newCell, setNewCell] = useContext(CellsContext);
@@ -47,11 +46,9 @@ export const ThreeScenes = () => {
         }
     }, [scene2D, tray]);
     return (
-     <div className="relative">
-         <div className='flex flex-row'>
-                 <canvas id="myThreeJsCanvas2D" className="absolute"/>
-                 <canvas id="myThreeJsCanvas3D" className="absolute"/>
-         </div>
+     <div>
+        <canvas id="myThreeJsCanvas2D"/>
+        <canvas id="myThreeJsCanvas3D"/>
      </div>
 
     )

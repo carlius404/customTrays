@@ -23,7 +23,6 @@
     "prisma": "^5.9.1",
     "react": "^18",
     "react-dom": "^18",
-    "@types/": "gamestdio/timer",
     "react-hook-form": "^7.50.1",
     "react-spinners": "^0.13.8",
     "resend": "^3.2.0",
