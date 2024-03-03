@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { TbCubePlus } from "react-icons/tb"
 import { TbCylinderPlus } from "react-icons/tb"
 import { TbSpherePlus } from "react-icons/tb"
@@ -9,10 +9,16 @@ import { FaRegSquare } from "react-icons/fa"
 import { BiShapePolygon } from "react-icons/bi"
 import { FaRegCircle } from "react-icons/fa"
 import { CellsContext, TrayContext } from '@/app/create/page'
+import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
 
 export const CellsMenu = () => {
   const [newCell, setNewCell] = useContext(CellsContext);
   const [tray, setTray] = useContext(TrayContext);
+  const [thickness,setThickness]=useState(2.5)
+
+  const handleThickness=(value)=>{
+    setTray({...tray,thickness:value})
+  }
   return (
     <div className="flex flex-col gap-1 bg-slate-700 rounded-md">
       <div className="flex flex-row gap-1 text-2xl">
@@ -27,13 +33,14 @@ export const CellsMenu = () => {
       </div>
       <div className="flex flex-row gap-1 text-2xl">
         <h1 className="text-xl text-slate-400">Tray:</h1>
-          <FaRegSquare className="hover:text-indigo-500" onClick={()=>setTray("box")}></FaRegSquare>
-          <FaRegCircle className="hover:text-indigo-500" onClick={()=>setTray("cylinder")}></FaRegCircle>
-          <BiShapePolygon className="hover:text-indigo-500" onClick={()=>setTray("polygon")}></BiShapePolygon>
+          <FaRegSquare className="hover:text-indigo-500" onClick={()=>setTray({geom:"box", thickness:thickness})}></FaRegSquare>
+          <FaRegCircle className="hover:text-indigo-500" onClick={()=>setTray({geom:"cylinder", thickness:thickness})}></FaRegCircle>
+          <BiShapePolygon className="hover:text-indigo-500" onClick={()=>setTray({geom:"polygon", thickness:thickness})}></BiShapePolygon>
       </div>
       <div className="flex flex-row">
         <a className="text-slate-400">Tray thickness:</a>
-        <input type="number" value="2.5"  className="w-12 bg-slate-600 border border-slate-500 text-sm rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-200"></input>
+        <input type="number" value={thickness} onChange={(event)=>handleThickness(Number(event.target.value))}   className="w-12 bg-slate-600 border border-slate-500 text-sm rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-200"></input>
+
       </div>
     </div>
   )
