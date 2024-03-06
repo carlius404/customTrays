@@ -5,13 +5,14 @@ import {GUI} from "dat.gui"
 import { create } from 'domain';
 
 export default class ThreeScene{
-    constructor(canvasref,drag,orbit,ortographic,dimGui,maxDim){
+    constructor(canvasref,drag,orbit,ortographic,dimGui,light,maxDim){
         this.drag=drag
         this.orbit=orbit
         this.ortographic=ortographic
         this.canvasref = canvasref
         this.dimGui=dimGui
         this.maxDim=maxDim
+        this.light=light
 
         this.selectedObj=null
         this.beforeColor=null
@@ -40,7 +41,6 @@ export default class ThreeScene{
         }
         this.camera.position.z = 90;
         
-
         this.renderer = new THREE.WebGLRenderer({canvas:this.canvasref.current, antialias:true});
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize(window.innerWidth/2, window.innerHeight);
@@ -64,7 +64,7 @@ export default class ThreeScene{
 
     onDragStart(event){
         const numberOfFolders = Object.keys(this.gui.__folders).length
-        if(numberOfFolders>=1){
+        if(numberOfFolders>=1 && this.selectedObj!=event.object){
             this.gui.removeFolder(this.folder)
         }
         if(this.selectedObj!=event.object){
@@ -79,56 +79,118 @@ export default class ThreeScene{
             this.folder= this.createFolder(this.selectedObj)
             this.folder.open();
             
-        }else{
-            this.selectedObj=null
-            event.object.material.color.set("#"+this.beforeColor)
-            this.beforeColor=null
         }
+        // else{
+        //     this.selectedObj=null
+        //     event.object.material.color.set("#"+this.beforeColor)
+        //     this.beforeColor=null
+        // }
     }
+
+    removeObjByName(name){
+        this.scene.children.map((obj)=>{
+            if(obj.name!=name){
+                return obj
+            }
+        })
+    }
+
     
     onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.aspect = window.innerWidth /2/ window.innerHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setSize( window.innerWidth/2, window.innerHeight );
 
     }
 
+    removeObj(obj){
+        
+    }
     createFolder(obj){
-        var folder
+        console.log(obj)
+        var folder=this.gui.addFolder('');
+
+        //box geometry
         if(obj.geometry instanceof THREE.BoxGeometry){
-            folder=this.gui.addFolder('Box');
-            folder.add(obj.scale, 'x', obj.geometry.scale.x, this.maxDim).name('Width');
-            folder.add(obj.scale, 'y', obj.geometry.scale.y, this.maxDim).name('Height');
+            var controllers={width:obj.geometry.parameters.width, height:obj.geometry.parameters.height, depth:obj.geometry.parameters.depth}
+            folder.add(controllers, 'width', 0, this.maxDim).name('Width').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.BoxGeometry(this.getValue(), controllers.height, controllers.depth)
+    
+                })
+            folder.add(controllers, 'height', 0, this.maxDim).name('Height').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.BoxGeometry(controllers.width, this.getValue(), controllers.depth)
+    
+                })
+            folder.add(controllers, 'depth', 0, this.maxDim).name('Depth').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.BoxGeometry(controllers.width, controllers.height, this.getValue())
+    
+                })
+            return folder
+        }
+
+        //sphere geometry
+        if(obj.geometry instanceof THREE.SphereGeometry){
+            var controllers={radius:obj.geometry.parameters.radius}
+            folder.add(controllers, 'radius', 0, this.maxDim).name('Radius').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.SphereGeometry(this.getValue(), 32, 32)
+    
+                })
+   
+            return folder
+        }
+
+        //cylinder geometry
+        if(obj.geometry instanceof THREE.CylinderGeometry){
+            console.log
+            var controllers={radiusTop:obj.geometry.parameters.radiusTop, radiusBottom:obj.geometry.parameters.radiusBottom, height:obj.geometry.parameters.height, radialSegments:obj.geometry.parameters.radialSegments}
+            folder.add(controllers, 'radiusTop', 0, this.maxDim).name('Radius top').onChange(
+            function(){
+                obj.geometry.dispose()
+                obj.geometry=new THREE.CylinderGeometry(this.getValue(), controllers.radiusBottom, controllers.height, controllers.radialSegments)
+
+            }
+            )
+
+            folder.add(controllers, 'radiusBottom', 0, this.maxDim).name('Radius bottom').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.CylinderGeometry(controllers.radiusTop,this.getValue(), controllers.height, controllers.radialSegments)
+    
+                }
+                )
+            
+            folder.add(controllers, 'radialSegments', 0, this.maxDim).name('Radial segments').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.CylinderGeometry(controllers.radiusTop,controllers.radiusBottom, controllers.height, this.getValue())
+    
+                }
+                )
+                
+            folder.add(controllers, 'height', 0, this.maxDim).name('depth').onChange(
+                function(){
+                    obj.geometry.dispose()
+                    obj.geometry=new THREE.CylinderGeometry(controllers.radiusTop,controllers.radiusBottom, this.getValue(), controllers.radialSegments)
+                    
+                })
             return folder
         }
         
-        if(obj.geometry instanceof THREE.CylinderGeometry){
-            folder=this.gui.addFolder('Cylinder');
-            folder.add(obj.scale, 'radiusTop', 0.1, this.maxDim).name('radius top');
-            folder.add(obj.scale, 'radiusBottom', 0.1, this.maxDim).name('radius bottom');
-            return folder
-        }
 
-        if(obj.geometry instanceof THREE.SphereGeometry){
-            folder=this.gui.addFolder('Sphere');
-            folder.add(obj.scale, 'radius', 0.1, this.maxDim).name('radius');
-            return folder
-        }
 
-        if(obj.geometry instanceof THREE.ConeGeometry){
-            folder=this.gui.addFolder('Cone');
-            folder.add(obj.scale, 'radius', 0.1, this.maxDim).name('radius');
-            return folder
-        }
-
-        if(obj.geometry instanceof THREE.RingGeometry){
-            folder=this.gui.addFolder('Ring');
-            folder.add(obj.scale, 'innerRadius', 0.1, this.maxDim).name('inner radius');
-            folder.add(obj.scale, 'outerRadius', 0.1, this.maxDim).name('outer radius');
-            return folder
-        }
+    
+        
         
     }
+
 
     createObj(geom,dim,thickness,color){
         const mesh=new THREE.MeshBasicMaterial({color: color, side:THREE.BackSide})
@@ -155,19 +217,6 @@ export default class ThreeScene{
 			  );
 		}
 
-		if(geom=="cone"){
-			var obj=new THREE.Mesh(
-				new THREE.ConeGeometry(dim, thickness, 32), //radius,height,radiusSegments
-				mesh,
-			  );
-		}
-
-		if(geom=="ring"){
-			var obj=new THREE.Mesh(
-				new THREE.RingGeometry(dim-dim/2, dim, 32), //innerradius,outerRadius,thetaSegments
-				mesh,
-			  );
-		}
         if(geom=="polygon"){
 			var obj=new THREE.Mesh(
 				new THREE.CylinderGeometry(dim, dim, thickness, 3), //radiustop,radiusbottom,height,radialsegments,

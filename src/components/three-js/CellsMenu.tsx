@@ -17,6 +17,7 @@ export const CellsMenu = () => {
   const [thickness,setThickness]=useState(2.5)
 
   const handleThickness=(value)=>{
+    setThickness(value)
     setTray({...tray,thickness:value})
   }
   return (
@@ -26,9 +27,7 @@ export const CellsMenu = () => {
           <TbCubePlus className="hover:text-indigo-500" onClick={()=>setNewCell("box")}></TbCubePlus>
           <TbCylinderPlus className="hover:text-indigo-500" onClick={()=>setNewCell("cylinder")}></TbCylinderPlus>
           <TbSpherePlus className="hover:text-indigo-500" onClick={()=>setNewCell("sphere")}></TbSpherePlus>
-          <TbConePlus className="hover:text-indigo-500" onClick={()=>setNewCell("cone")}></TbConePlus>
           <BiShapePolygon className="hover:text-indigo-500" onClick={()=>setNewCell("polygon")}></BiShapePolygon>
-          <TbCirclePlus className="hover:text-indigo-500" onClick={()=>setNewCell("ring")}></TbCirclePlus>
           <MdOutlineTextIncrease className="hover:text-indigo-500" onClick={()=>setNewCell("text")}></MdOutlineTextIncrease>
       </div>
       <div className="flex flex-row gap-1 text-2xl">
