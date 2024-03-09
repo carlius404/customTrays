@@ -2,13 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DragControls } from 'three/addons/controls/DragControls.js';
 import {GUI} from "dat.gui"
-import { create } from 'domain';
 
 export default class ThreeScene{
-    constructor(canvasref,drag,orbit,ortographic,dimGui,light,maxDim){
+    constructor(canvasref,drag,orbit,dimGui,light,maxDim){
         this.drag=drag
         this.orbit=orbit
-        this.ortographic=ortographic
         this.canvasref = canvasref
         this.dimGui=dimGui
         this.maxDim=maxDim
@@ -20,26 +18,16 @@ export default class ThreeScene{
         this.onDragStart = this.onDragStart.bind(this)
         this.onWindowResize= this.onWindowResize.bind(this)
         this.tray=null
+        this.trayThickness=null
     }
 
     init(){
         this.scene = new THREE.Scene();
-        if(this.ortographic){
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            this.camera = new THREE.OrthographicCamera(
-                width / - 2,
-                width / 2,
-                height / 2,
-                height / - 2,
-                1,
-                1000
-            );
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/2/ window.innerHeight, 0.1, 1000)
 
-        }else{
-            this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/2/ window.innerHeight, 0.1, 1000)
-        }
-        this.camera.position.z = 90;
+        this.camera.position.z=90;
+
+        
         
         this.renderer = new THREE.WebGLRenderer({canvas:this.canvasref.current, antialias:true});
         this.renderer.setPixelRatio( window.devicePixelRatio );
@@ -57,7 +45,6 @@ export default class ThreeScene{
             this.raycaster = new THREE.Raycaster();
             this.mouse = new THREE.Vector2();
             this.gui = new GUI();
-            //window.addEventListener('click', this.onClick);
         }
         
     }
@@ -80,11 +67,7 @@ export default class ThreeScene{
             this.folder.open();
             
         }
-        // else{
-        //     this.selectedObj=null
-        //     event.object.material.color.set("#"+this.beforeColor)
-        //     this.beforeColor=null
-        // }
+
     }
 
     removeObjByName(name){
@@ -105,6 +88,14 @@ export default class ThreeScene{
 
     removeObj(obj){
         
+    }
+
+    setCellPosition(obj,cellDepth){
+
+        obj.position.z=this.trayThickness/2-cellDepth/2
+        if(obj.geometry instanceof THREE.SphereGeometry){
+            obj.position.z=this.trayThickness/2
+        }
     }
     createFolder(obj){
         console.log(obj)
@@ -129,8 +120,11 @@ export default class ThreeScene{
                 function(){
                     obj.geometry.dispose()
                     obj.geometry=new THREE.BoxGeometry(controllers.width, controllers.height, this.getValue())
-    
-                })
+                }).onFinishChange(
+                    (value)=>{
+                        this.setCellPosition(obj,value)
+                    }
+                )
             return folder
         }
 
@@ -140,9 +134,13 @@ export default class ThreeScene{
             folder.add(controllers, 'radius', 0, this.maxDim).name('Radius').onChange(
                 function(){
                     obj.geometry.dispose()
-                    obj.geometry=new THREE.SphereGeometry(this.getValue(), 32, 32)
-    
-                })
+                    obj.geometry=new THREE.SphereGeometry(this.getValue(), 32, 32,undefined,undefined,undefined,Math.PI/2)
+                        
+                }).onFinishChange(
+                    (value)=>{
+                        this.setCellPosition(obj,value)
+                    }
+                )
    
             return folder
         }
@@ -180,20 +178,18 @@ export default class ThreeScene{
                     obj.geometry.dispose()
                     obj.geometry=new THREE.CylinderGeometry(controllers.radiusTop,controllers.radiusBottom, this.getValue(), controllers.radialSegments)
                     
-                })
+                }).onFinishChange(
+                    (value)=>{
+                        this.setCellPosition(obj,value)
+                    }
+                )
             return folder
         }
-        
-
-
-    
-        
-        
     }
 
 
     createObj(geom,dim,thickness,color){
-        const mesh=new THREE.MeshBasicMaterial({color: color, side:THREE.BackSide})
+        const mesh=new THREE.MeshBasicMaterial({color: color})
 
         if(geom=="box"){
 			var obj=new THREE.Mesh(
@@ -207,14 +203,16 @@ export default class ThreeScene{
 				new THREE.CylinderGeometry(dim, dim, thickness, 32), //radiustop,radiusbottom,height,radialsegments,
 				mesh,
 			  );
-            
+              obj.rotation.x=Math.PI/2
 		}
 
 		if(geom=="sphere"){
+            mesh.side = THREE.DoubleSide;
 			var obj=new THREE.Mesh(
-				new THREE.SphereGeometry(thickness, 32, 32), //radius, widthsegments,heightsegments
+				new THREE.SphereGeometry(thickness, 32, 32,undefined,undefined,undefined,Math.PI/2), //radius, widthsegments,heightsegments
 				mesh,
 			  );
+            obj.rotation.x=3*Math.PI/2
 		}
 
         if(geom=="polygon"){
@@ -222,6 +220,7 @@ export default class ThreeScene{
 				new THREE.CylinderGeometry(dim, dim, thickness, 3), //radiustop,radiusbottom,height,radialsegments,
 				mesh,
 			  );
+              obj.rotation.x=Math.PI/2
 		}
 
         return obj
@@ -229,6 +228,7 @@ export default class ThreeScene{
 
     addCell(geom,dim,thickness){
         const obj=this.createObj(geom,dim,thickness,"#334155")
+        this.setCellPosition(obj,thickness)
         this.scene.add(obj)
     }
 
@@ -237,6 +237,8 @@ export default class ThreeScene{
             this.scene.remove(this.tray)
         }
         this.tray=this.createObj(geom,dim,thickness,"#475569")
+        this.tray.name='tray'
+        this.trayThickness=thickness
 
         this.scene.add(this.tray)
     }

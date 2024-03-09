@@ -14,15 +14,14 @@ export const ThreeScenes = () => {
     
     useEffect(() => {
         if (typeof scene2D === 'undefined') {
-            const scene2D = new ThreeScene(canvas2d, true,false,false,true,maxDim)
-            const scene3D = new ThreeScene(canvas3d, false,true,false,false,maxDim)
+            const scene2D = new ThreeScene(canvas2d, true,false,true,maxDim)
+            const scene3D = new ThreeScene(canvas3d, false,true,false,maxDim)
             setScene2D(scene2D)
             setScene3D(scene3D)
             scene2D.init()      
             scene3D.init()
-            scene2D.addCell("cylinder",maxDim/3,2)
-            scene2D.addCell("box",maxDim/3,2)
-           // scene2D.setTray("box",maxDim,2.5)
+            scene2D.setTray("box",maxDim,tray.thickness)
+            scene2D.addCell("box",maxDim/3,tray.thickness/2)
 
 
             const animate=()=>{
@@ -39,17 +38,17 @@ export const ThreeScenes = () => {
 
     useEffect(() => {
         if (scene2D && newCell !== null) {
-            scene2D.addCell(newCell,maxDim/3,2)
+            scene2D.addCell(newCell,maxDim/3,tray.thickness/2)
         }
     }, [scene2D, newCell]);
 
-    // useEffect(() => {
+    useEffect(() => {
         
-    //     if (scene2D && tray !== null) {
-    //         console.log("SET TRAY",tray,typeof tray.thickness)
-    //         scene2D.setTray(tray.geom,maxDim,tray.thickness)
-    //     }
-    // }, [scene2D, tray]);
+        if (scene2D && tray !== null) {
+            console.log("SET TRAY",tray,typeof tray.thickness)
+            scene2D.setTray(tray.geom,maxDim,tray.thickness)
+        }
+    }, [scene2D, tray]);
     return (
         <div className="flex flex-row gap-5">
             <canvas ref={canvas2d}  className="w-1/3 h-full border-2 border-slate-800 rounded-lg"></canvas>

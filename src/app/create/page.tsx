@@ -12,7 +12,7 @@ export const TrayContext=createContext()
 export default function Home() {
 	console.log("add cell")
 	const [newCell, setNewCell]=useState(null)
-	const [tray, setTray]=useState({geom:"box",thickness:2.5})
+	const [tray, setTray]=useState({geom:"box",thickness:6})
 
 	return (
 		<CellsContext.Provider value={[newCell, setNewCell]}>
