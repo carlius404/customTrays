@@ -63,8 +63,11 @@ export default class ThreeScene{
             this.beforeColor=event.object.material.color.getHexString()
             this.selectedObj=event.object
             event.object.material.color.set("#4338ca")
-            this.folder= this.createFolder(this.selectedObj)
-            this.folder.open();
+            if(this.selectedObj.name!='tray'){
+                this.folder= this.createFolder(this.selectedObj)
+                this.folder.open()
+            }
+            
             
         }
 
@@ -97,6 +100,7 @@ export default class ThreeScene{
             obj.position.z=this.trayThickness/2
         }
     }
+    
     createFolder(obj){
         console.log(obj)
         var folder=this.gui.addFolder('');
@@ -232,12 +236,42 @@ export default class ThreeScene{
         this.scene.add(obj)
     }
 
+    changeTrayShape(geom,thickness){
+        var dim
+        if(this.tray.geometry instanceof THREE.BoxGeometry){
+            dim=Math.max(this.tray.geometry.parameters.width,this.tray.geometry.parameters.height)
+        }
+        if(this.tray.geometry instanceof THREE.CylinderGeometry){
+            dim=this.tray.geometry.parameters.radiusTop
+        }
+
+        if(geom=="cylinder" || geom=="polygon"){
+            if(geom=='polygon'){
+                var vertices=3
+            }else{
+                var vertices=32
+            }
+            this.tray.geometry.dispose()
+            this.tray.geometry=new THREE.CylinderGeometry(dim, dim, thickness, vertices)
+            this.tray.rotation.x=Math.PI/2
+        }
+        if(geom=="box"){
+            this.tray.geometry.dispose()
+            this.tray.geometry=new THREE.BoxGeometry(dim, dim, thickness)
+            this.tray.rotation.x=0
+        }
+        console.log('change thick',thickness,this.trayThickness)
+        this.tray.position.z-=(thickness-this.trayThickness)/2
+    }
+
     setTray(geom,dim,thickness){
         if(this.tray!=null){
-            this.scene.remove(this.tray)
+            this.changeTrayShape(geom,thickness)
+        }else{
+            this.tray=this.createObj(geom,dim,thickness,"#475569")
+            this.tray.position.z=0
+            this.tray.name='tray'
         }
-        this.tray=this.createObj(geom,dim,thickness,"#475569")
-        this.tray.name='tray'
         this.trayThickness=thickness
 
         this.scene.add(this.tray)

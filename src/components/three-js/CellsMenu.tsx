@@ -14,7 +14,7 @@ import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberIn
 export const CellsMenu = () => {
   const [newCell, setNewCell] = useContext(CellsContext);
   const [tray, setTray] = useContext(TrayContext);
-  const [thickness,setThickness]=useState(2.5)
+  const [thickness,setThickness]=useState(tray.thickness)
 
   const handleThickness=(value)=>{
     setThickness(value)
